@@ -1,0 +1,5 @@
+# git ignore for the python project with virtual environment
+# Ignore the virtual environment
+venv/
+# Ignore the python cache files
+__pycache__/
