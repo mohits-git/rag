@@ -1,16 +1,30 @@
-from dotenv import load_dotenv
-import os
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+import pymongo
+import requests
 
-load_dotenv()
-MONGO_URI = os.environ["DATABASE_URL"]
+from config import DATABASE_URI, HF_ACCESS_TOKEN
 
-client = MongoClient(MONGO_URI, server_api=ServerApi('1'))
+client = pymongo.MongoClient(DATABASE_URI)
 db = client.sample_mflix
 collection = db.movies
 
-items = collection.find().limit(5)
 
-for item in items:
-    print(item)
+embedding_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+
+
+def generate_embedding(text: str) -> list[float]:
+    response = requests.post(
+        embedding_url,
+        headers={"Authorization": f"Bearer {HF_ACCESS_TOKEN}"},
+        json={"inputs": text}
+    )
+
+    if response.status_code != 200:
+        raise Exception(
+            f"Request failed with status code: {
+                response.status_code}, {response.text}"
+        )
+
+    return response.json()
+
+
+print(generate_embedding("Hello, World!"))

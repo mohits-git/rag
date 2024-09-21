@@ -22,3 +22,9 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
+> Install certificates for ssl verification, if you are facing issues connecting to the mongodb
+> you can manually install the certificates by running the following command (in macOS):
+> ```bash
+> /Applications/Python\ 3.x/Install\ Certificates.command
+> ```
