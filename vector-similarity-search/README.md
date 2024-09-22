@@ -1,4 +1,7 @@
 # Vector Similarity Search
+Build with MongoDB Atlas Vector Search
+
+Simple Application to demonstrate the use of MongoDB Atlas Vector Search to perform similarity search on vectors and generating embeddings using Hugging Face [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) sentence transformer model.
 
 ## Setup
 
