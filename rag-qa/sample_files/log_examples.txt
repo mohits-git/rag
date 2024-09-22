@@ -1,0 +1,4 @@
+2023-01-01 00:00:00,000 - root - INFO - This is an informative message
+2023-01-01 00:00:00,000 - root - WARNING - This is a warning message
+2023-01-01 00:00:00,000 - root - ERROR - This is an error message
+2023-01-01 00:00:00,000 - root - CRITICAL - This is a critical message
