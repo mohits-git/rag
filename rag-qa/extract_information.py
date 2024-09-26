@@ -13,10 +13,19 @@ dbName = "langchain_demo"
 collectionName = "collection_of_text_blobs"
 collection = client[dbName][collectionName]
 
-loader = DirectoryLoader('./sample_files', glob="./*.txt", show_progress=True)
-data = loader.load()
-
 embeddings = OpenAIEmbeddings(openai_api_key=config.OPENAI_API_KEY)
 
-vectorStore = MongoDBAtlasVectorSearch.from_documents(
-    data, embeddings, collection=collection)
+vectorStore = MongoDBAtlasVectorSearch(collection, embeddings)
+
+
+def query_data(query):
+    docs = vectorStore.similarity_search(query, K=1)
+    as_output = docs[0].page_content
+
+    llm = OpenAI(openai_api_key=config.OPENAI_API_KEY, temperature=0)
+    retriever = vectorStore.as_retriever()
+    qa = RetrievalQA.from_chain_type(
+        llm, chain_type="stuff", retriever=retriever)
+    retriever_output = qa.run(query)
+
+    return as_output, retriever_output
