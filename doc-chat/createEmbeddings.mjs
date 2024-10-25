@@ -1,7 +1,7 @@
 import { promises as fsp } from "fs";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MongoDBAtlasVectorSearch } from "langchain/vectorstores/mongodb_atlas";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
+import { OllamaEmbeddings } from "@langchain/ollama";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 
@@ -16,16 +16,21 @@ console.log(fileNames);
 for (const fileName of fileNames) {
   const document = await fsp.readFile(`${docs_dir}/${fileName}`, "utf8");
   console.log(`Vectorizing ${fileName}`);
-  
+
   const splitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
     chunkSize: 500,
     chunkOverlap: 50,
   });
   const output = await splitter.createDocuments([document]);
-  
+
+  const embeddings = new OllamaEmbeddings({
+    model: "mxbai-embed-large", // Default value
+    baseUrl: "http://localhost:11434", // Default value
+  });
+
   await MongoDBAtlasVectorSearch.fromDocuments(
     output,
-    new OpenAIEmbeddings(),
+    embeddings,
     {
       collection,
       indexName: "default",

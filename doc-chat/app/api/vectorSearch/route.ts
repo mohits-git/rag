@@ -1,26 +1,34 @@
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { MongoDBAtlasVectorSearch } from "langchain/vectorstores/mongodb_atlas";
+import { OllamaEmbeddings } from "@langchain/ollama";
+import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
 import mongoClientPromise from '@/app/lib/mongodb';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export const runtime = 'nodejs';
+
+export async function POST(req: NextRequest) {
   const client = await mongoClientPromise;
   const dbName = "docs";
   const collectionName = "embeddings";
   const collection = client.db(dbName).collection(collectionName);
-  
-  const question = await req.text();
 
+  const question = await req.text();
+  console.debug("Question: ", question)
+
+  const embeddings = new OllamaEmbeddings({
+    model: "mxbai-embed-large",
+    baseUrl: "http://localhost:11434",
+  });
+
+  console.debug("Embeddings Created")
   const vectorStore = new MongoDBAtlasVectorSearch(
-    new OpenAIEmbeddings({
-      modelName: 'text-embedding-ada-002',
-      stripNewLines: true,
-    }), {
+    embeddings, {
     collection,
-    indexName: "default",
-    textKey: "text", 
+    indexName: "vector_index",
+    textKey: "text",
     embeddingKey: "embedding",
   });
 
+  console.debug("Vector Store Created")
   const retriever = vectorStore.asRetriever({
     searchType: "mmr",
     searchKwargs: {
@@ -28,8 +36,10 @@ export async function POST(req: Request) {
       lambda: 0.1,
     },
   });
-  
-  const retrieverOutput = await retriever.getRelevantDocuments(question);
-  
-  return Response.json(retrieverOutput);
+
+  console.debug("Retriever Created")
+  const retrieverOutput = await retriever.invoke(question);
+
+  console.debug("RETRIEVER OUTPUT: ", retrieverOutput);
+  return NextResponse.json(retrieverOutput);
 }
