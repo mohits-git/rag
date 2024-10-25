@@ -7,3 +7,10 @@ __pycache__/
 .env
 # macOS
 .DS_Store
+# for javascript/typescipt next.js project
+node_modules/
+.next/
+out/
+dist/
+.cache/
+build/
